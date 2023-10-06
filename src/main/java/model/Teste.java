@@ -1,21 +1,56 @@
 package model;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import jakarta.json.bind.JsonbBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 
 public class Teste {
-    public static void main(String[] args) throws JAXBException {
-        Verse v = new Verse();
-        v.setDescription("Minha descrição");
-        v.setN(2);
 
-        Verse v2 = new Verse();
-        v2.setDescription("Minha descrição sdsdafdsf");
-        v2.setN(5);
+    public static void main(String[] args) {
+        InputStream is = Teste.class.getClassLoader().getResourceAsStream("Biblia.xml");
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(is);
+
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            String expression = String.format("/bible/book[@abbrev = '%s']/c[@n = %s]/v[@n >= %s and @n <= %s]", "gn",
+                    "1", "3", "6");
+            List<Verse> verses = new ArrayList<>();
+            NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element v = (Element) nodeList.item(i);
+                verses.add(new Verse(Integer.parseInt(v.getAttribute("n")), v.getTextContent()));
+            }
+            String x = JsonbBuilder.create().toJson(verses);
+            System.out.println(x);
+        } catch (ParserConfigurationException | SAXException | XPathExpressionException | IOException ex) {
+
+        }        
+    }
+
+    public static void main2(String[] args) throws JAXBException {
+        Verse v = new Verse(2, "Minha descrição");
+        Verse v2 = new Verse(5, "Minha descrição sdsdafdsf");
 
         List<Verse> verses = new ArrayList<>();
         verses.add(v);
@@ -25,13 +60,9 @@ public class Teste {
         c.setVerses(verses);
         c.setN(4);
 
-        Verse v3 = new Verse();
-        v3.setDescription("Minha descrição");
-        v3.setN(2);
+        Verse v3 = new Verse(2, "Minha descrição");
 
-        Verse v4 = new Verse();
-        v4.setDescription("Minha descrição sdsdafdsf");
-        v4.setN(5);
+        Verse v4 = new Verse(5, "Minha descrição sdsdafdsf");
 
         List<Verse> verses2 = new ArrayList<>();
         verses2.add(v3);

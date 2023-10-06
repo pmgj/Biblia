@@ -9,6 +9,11 @@ public class Verse {
     private int n;
     private String description;
 
+    public Verse(int n, String description) {
+        this.n = n;
+        this.description = description;
+    }
+
     @XmlAttribute
     public int getN() {
         return n;
