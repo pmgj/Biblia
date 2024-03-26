@@ -3,8 +3,6 @@ class GUI {
         this.xml = null;
         this.eBook = null;
         this.eChapter = null;
-        this.eVerseFrom = null;
-        this.eVerseTo = null;
     }
     populateBooks() {
         let books = this.xml.querySelectorAll("book");
@@ -24,17 +22,17 @@ class GUI {
         this.populateVerses();
     }
     populateVerses() {
-        this.eVerseFrom.innerHTML = "";
-        this.eVerseTo.innerHTML = "";
         let bookAbbrev = this.eBook.value;
         let chapterNumber = this.eChapter.value;
         let chapter = this.xml.querySelector(`book[abbrev='${bookAbbrev}'] c[n='${chapterNumber}']`);
         let verses = chapter.querySelectorAll(`v`);
+        let response = document.querySelector("#response");
+        response.innerHTML = "";
         for (const v of verses) {
-            this.eVerseFrom.add(new Option(v.getAttribute("n"), v.getAttribute("n")));
-            this.eVerseTo.add(new Option(v.getAttribute("n"), v.getAttribute("n")));
+            let p = document.createElement("p");
+            p.innerHTML = `<sup>${v.getAttribute("n")}</sup>` + v.textContent;
+            response.appendChild(p);
         }
-        this.showVerse();
     }
     showVerse() {
         let bookAbbrev = this.eBook.value;
@@ -56,10 +54,6 @@ class GUI {
         this.eBook.onchange = this.populateChapters.bind(this);
         this.eChapter = document.querySelector("#capitulo");
         this.eChapter.onchange = this.populateVerses.bind(this);
-        this.eVerseFrom = document.querySelector("#versiculoDe");
-        this.eVerseFrom.onchange = this.showVerse.bind(this);
-        this.eVerseTo = document.querySelector("#versiculoPara");
-        this.eVerseTo.onchange = this.showVerse.bind(this);
         let xhr = new XMLHttpRequest();
         xhr.responseType = "document";
         xhr.onload = evt => {
